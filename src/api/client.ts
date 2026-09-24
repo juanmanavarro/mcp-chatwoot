@@ -144,7 +144,7 @@ export class ChatwootClient {
 
   async updateContact(contactId: number, data: Record<string, unknown>, accountId?: number): Promise<unknown> {
     const http = this.forAccount(accountId);
-    const res = await http.patch(`/contacts/${contactId}`, data);
+    const res = await http.put(`/contacts/${contactId}`, data);
     return res.data;
   }
 
@@ -303,8 +303,21 @@ export class ChatwootClient {
 
   async getAgent(agentId: number, accountId?: number): Promise<unknown> {
     const http = this.forAccount(accountId);
-    const res = await http.get(`/agents/${agentId}`);
-    return res.data;
+    // Chatwoot exposes agents as a collection; there is no GET /agents/:id route.
+    const res = await http.get('/agents');
+    const payload = res.data as unknown;
+    const agents = Array.isArray(payload)
+      ? payload
+      : payload && typeof payload === 'object'
+        ? Object.values(payload as Record<string, unknown>).find(Array.isArray) as unknown[] | undefined
+        : undefined;
+    const agent = agents?.find(
+      (entry) => entry && typeof entry === 'object' && Number((entry as Record<string, unknown>).id) === agentId,
+    );
+    if (!agent) {
+      throw new ChatwootApiError(404, `Agent ${agentId} not found`);
+    }
+    return agent;
   }
 
   // ─── Teams ───────────────────────────────────────────────
@@ -353,7 +366,7 @@ export class ChatwootClient {
   async getConversationCounts(status?: string, accountId?: number): Promise<unknown> {
     const http = this.forAccount(accountId);
     const params = status ? { status } : {};
-    const res = await http.get('/conversations/counts', { params });
+    const res = await http.get('/conversations/meta', { params });
     return res.data;
   }
 
@@ -814,7 +827,8 @@ export class ChatwootClient {
 
   async getProfile(accountId?: number): Promise<unknown> {
     const http = this.forAccount(accountId);
-    const res = await http.get('/profile');
+    const profileUrl = `${this.baseUrl.replace(/\/+$/, '')}/api/v1/profile`;
+    const res = await http.get(profileUrl);
     return res.data;
   }
 

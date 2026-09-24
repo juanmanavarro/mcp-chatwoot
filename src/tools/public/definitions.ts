@@ -96,9 +96,10 @@ export const publicTools: Tool[] = [
       type: 'object' as const,
       properties: {
         ...inboxIdentifierProp,
+        contact_identifier: { type: 'string', description: 'The contact source_id / identifier' },
         conversation_id: { type: 'number', description: 'The conversation ID' },
       },
-      required: ['inbox_identifier', 'conversation_id'],
+      required: ['inbox_identifier', 'contact_identifier', 'conversation_id'],
     },
   },
   {
@@ -109,9 +110,10 @@ export const publicTools: Tool[] = [
       type: 'object' as const,
       properties: {
         ...inboxIdentifierProp,
+        contact_identifier: { type: 'string', description: 'The contact source_id / identifier' },
         conversation_id: { type: 'number', description: 'The conversation ID' },
       },
-      required: ['inbox_identifier', 'conversation_id'],
+      required: ['inbox_identifier', 'contact_identifier', 'conversation_id'],
     },
   },
   {
@@ -173,9 +175,10 @@ export const publicTools: Tool[] = [
       type: 'object' as const,
       properties: {
         ...inboxIdentifierProp,
+        contact_identifier: { type: 'string', description: 'The contact source_id / identifier' },
         conversation_id: { type: 'number', description: 'The conversation ID' },
       },
-      required: ['inbox_identifier', 'conversation_id'],
+      required: ['inbox_identifier', 'contact_identifier', 'conversation_id'],
     },
   },
   {
@@ -186,11 +189,12 @@ export const publicTools: Tool[] = [
       type: 'object' as const,
       properties: {
         ...inboxIdentifierProp,
+        contact_identifier: { type: 'string', description: 'The contact source_id / identifier' },
         conversation_id: { type: 'number', description: 'The conversation ID' },
         message_id: { type: 'number', description: 'The message ID' },
         submitted_values: { type: 'object', description: 'Key-value pairs for card responses' },
       },
-      required: ['inbox_identifier', 'conversation_id', 'message_id'],
+      required: ['inbox_identifier', 'contact_identifier', 'conversation_id', 'message_id'],
     },
   },
 ];

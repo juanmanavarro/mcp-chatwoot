@@ -68,8 +68,7 @@ async function dispatchPublic(
 
     // ─── Conversations ────────────────────────────────
     case 'public_create_conversation': {
-      const result = await client.createConversation(inbox(args), {
-        contact_identifier: args.contact_identifier as string,
+      const result = await client.createConversation(inbox(args), args.contact_identifier as string, {
         custom_attributes: args.custom_attributes as Record<string, unknown> | undefined,
       });
       return jsonResult(result);
@@ -81,12 +80,20 @@ async function dispatchPublic(
     }
 
     case 'public_get_conversation': {
-      const result = await client.getConversation(inbox(args), args.conversation_id as number);
+      const result = await client.getConversation(
+        inbox(args),
+        args.contact_identifier as string,
+        args.conversation_id as number,
+      );
       return jsonResult(result);
     }
 
     case 'public_resolve_conversation': {
-      const result = await client.resolveConversation(inbox(args), args.conversation_id as number);
+      const result = await client.resolveConversation(
+        inbox(args),
+        args.contact_identifier as string,
+        args.conversation_id as number,
+      );
       return jsonResult(result);
     }
 
@@ -116,13 +123,18 @@ async function dispatchPublic(
     }
 
     case 'public_list_messages': {
-      const result = await client.listMessages(inbox(args), args.conversation_id as number);
+      const result = await client.listMessages(
+        inbox(args),
+        args.contact_identifier as string,
+        args.conversation_id as number,
+      );
       return jsonResult(result);
     }
 
     case 'public_update_message': {
       const result = await client.updateMessage(
         inbox(args),
+        args.contact_identifier as string,
         args.conversation_id as number,
         args.message_id as number,
         { submitted_values: args.submitted_values as Record<string, unknown> | undefined },

@@ -58,7 +58,7 @@ describe('Public API Handlers', () => {
   // ─── Conversations ────────────────────────────────
 
   it('public_create_conversation creates a conversation', async () => {
-    scope.post('/conversations').reply(200, { id: 10 });
+    scope.post('/contacts/contact-123/conversations', {}).reply(200, { id: 10 });
     const result = await handlePublicToolCall(client, 'public_create_conversation', {
       inbox_identifier: INBOX_ID,
       contact_identifier: 'contact-123',
@@ -69,7 +69,7 @@ describe('Public API Handlers', () => {
   });
 
   it('public_list_conversations lists conversations', async () => {
-    scope.get('/conversations').query(true).reply(200, [{ id: 10 }]);
+    scope.get('/contacts/contact-123/conversations').reply(200, [{ id: 10 }]);
     const result = await handlePublicToolCall(client, 'public_list_conversations', {
       inbox_identifier: INBOX_ID,
       contact_identifier: 'contact-123',
@@ -80,10 +80,11 @@ describe('Public API Handlers', () => {
   });
 
   it('public_get_conversation gets a conversation', async () => {
-    scope.get('/conversations/10').reply(200, { id: 10, status: 'open' });
+    scope.get('/contacts/contact-123/conversations/10').reply(200, { id: 10, status: 'open' });
     const result = await handlePublicToolCall(client, 'public_get_conversation', {
       inbox_identifier: INBOX_ID,
       conversation_id: 10,
+      contact_identifier: 'contact-123',
     });
     const data = JSON.parse((result.content[0] as { text: string }).text);
     expect(data.status).toBe('open');
@@ -91,16 +92,17 @@ describe('Public API Handlers', () => {
   });
 
   it('public_resolve_conversation resolves', async () => {
-    scope.post('/conversations/10/toggle_status').reply(200, { id: 10, status: 'resolved' });
+    scope.post('/contacts/contact-123/conversations/10/toggle_status').reply(200, { id: 10, status: 'resolved' });
     const result = await handlePublicToolCall(client, 'public_resolve_conversation', {
       inbox_identifier: INBOX_ID,
       conversation_id: 10,
+      contact_identifier: 'contact-123',
     });
     expect(result.isError).toBeFalsy();
   });
 
   it('public_toggle_typing toggles typing', async () => {
-    scope.post('/conversations/10/toggle_typing').reply(200, {});
+    scope.post('/contacts/contact-123/conversations/10/toggle_typing').query({ typing_status: 'on' }).reply(200, {});
     const result = await handlePublicToolCall(client, 'public_toggle_typing', {
       inbox_identifier: INBOX_ID,
       conversation_id: 10,
@@ -111,7 +113,7 @@ describe('Public API Handlers', () => {
   });
 
   it('public_update_last_seen updates last seen', async () => {
-    scope.post('/conversations/10/update_last_seen').reply(200, {});
+    scope.post('/contacts/contact-123/conversations/10/update_last_seen').reply(200, {});
     const result = await handlePublicToolCall(client, 'public_update_last_seen', {
       inbox_identifier: INBOX_ID,
       conversation_id: 10,
@@ -123,7 +125,7 @@ describe('Public API Handlers', () => {
   // ─── Messages ─────────────────────────────────────
 
   it('public_create_message sends a message', async () => {
-    scope.post('/conversations/10/messages').reply(200, { id: 100, content: 'Hello' });
+    scope.post('/contacts/contact-123/conversations/10/messages', { content: 'Hello' }).reply(200, { id: 100, content: 'Hello' });
     const result = await handlePublicToolCall(client, 'public_create_message', {
       inbox_identifier: INBOX_ID,
       conversation_id: 10,
@@ -136,10 +138,11 @@ describe('Public API Handlers', () => {
   });
 
   it('public_list_messages lists messages', async () => {
-    scope.get('/conversations/10/messages').reply(200, [{ id: 100 }]);
+    scope.get('/contacts/contact-123/conversations/10/messages').reply(200, [{ id: 100 }]);
     const result = await handlePublicToolCall(client, 'public_list_messages', {
       inbox_identifier: INBOX_ID,
       conversation_id: 10,
+      contact_identifier: 'contact-123',
     });
     const data = JSON.parse((result.content[0] as { text: string }).text);
     expect(Array.isArray(data)).toBe(true);
@@ -147,10 +150,11 @@ describe('Public API Handlers', () => {
   });
 
   it('public_update_message updates a message', async () => {
-    scope.patch('/conversations/10/messages/100').reply(200, { id: 100 });
+    scope.patch('/contacts/contact-123/conversations/10/messages/100', {}).reply(200, { id: 100 });
     const result = await handlePublicToolCall(client, 'public_update_message', {
       inbox_identifier: INBOX_ID,
       conversation_id: 10,
+      contact_identifier: 'contact-123',
       message_id: 100,
     });
     expect(result.isError).toBeFalsy();

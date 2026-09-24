@@ -147,7 +147,9 @@ describe('Tool Handlers', () => {
   });
 
   it('get_profile returns jsonResult', async () => {
-    scope.get('/profile').reply(200, { id: 1, name: 'Admin' });
+    nock(BASE_URL, { reqheaders: { api_access_token: API_TOKEN } })
+      .get('/api/v1/profile')
+      .reply(200, { id: 1, name: 'Admin' });
     const result = await handleToolCall(client, 'get_profile', {});
     expect(result.isError).toBeFalsy();
     const parsed = JSON.parse((result.content[0] as { text: string }).text);

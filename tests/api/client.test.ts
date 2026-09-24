@@ -57,6 +57,16 @@ describe('ChatwootClient', () => {
     });
   });
 
+  describe('updateContact', () => {
+    it('should call PUT /contacts/:id', async () => {
+      const updates = { name: 'Updated' };
+      const mockData = { id: 1, ...updates };
+      scope.put('/contacts/1', updates).reply(200, mockData);
+      const result = await client.updateContact(1, updates);
+      expect(result).toEqual(mockData);
+    });
+  });
+
   describe('createContact', () => {
     it('should call POST /contacts', async () => {
       const input = { name: 'Jane', email: 'jane@test.com' };
@@ -114,10 +124,10 @@ describe('ChatwootClient', () => {
   });
 
   describe('getConversationCounts', () => {
-    it('should call GET /conversations/counts', async () => {
-      const mockData = { data: { meta: { all_count: 10 } } };
-      scope.get('/conversations/counts').reply(200, mockData);
-      const result = await client.getConversationCounts();
+    it('should call GET /conversations/meta with the optional status filter', async () => {
+      const mockData = { data: { meta: { all_count: 10, open_count: 4 } } };
+      scope.get('/conversations/meta').query({ status: 'open' }).reply(200, mockData);
+      const result = await client.getConversationCounts('open');
       expect(result).toEqual(mockData);
     });
   });
@@ -141,6 +151,14 @@ describe('ChatwootClient', () => {
   });
 
   // ─── Teams ──────────────────────────────────────────
+
+  describe('getAgent', () => {
+    it('should fetch an agent from the supported agents collection endpoint', async () => {
+      const agents = [{ id: 2, name: 'Alice' }, { id: 7, name: 'Bob' }];
+      scope.get('/agents').reply(200, agents);
+      await expect(client.getAgent(7)).resolves.toEqual(agents[1]);
+    });
+  });
 
   describe('createTeam', () => {
     it('should call POST /teams', async () => {
@@ -553,9 +571,11 @@ describe('ChatwootClient', () => {
   // ─── Profile ──────────────────────────────────────
 
   describe('getProfile', () => {
-    it('should call GET /profile', async () => {
-      const mockData = { id: 1, name: 'Admin', email: 'admin@test.com' };
-      scope.get('/profile').reply(200, mockData);
+    it('should call the user-level /api/v1/profile endpoint outside the account scope', async () => {
+      const mockData = { id: 4, name: 'Current User' };
+      nock(BASE_URL, { reqheaders: { api_access_token: API_TOKEN } })
+        .get('/api/v1/profile')
+        .reply(200, mockData);
       const result = await client.getProfile();
       expect(result).toEqual(mockData);
     });

@@ -33,6 +33,11 @@ export class ChatwootPublicClient {
     return instance;
   }
 
+  private conversationPath(contactIdentifier: string, conversationId?: number): string {
+    const path = `/contacts/${encodeURIComponent(contactIdentifier)}/conversations`;
+    return conversationId === undefined ? path : `${path}/${conversationId}`;
+  }
+
   // ─── Contacts ────────────────────────────────────────────
 
   async createContact(inboxIdentifier: string, data: {
@@ -51,7 +56,7 @@ export class ChatwootPublicClient {
 
   async getContact(inboxIdentifier: string, contactIdentifier: string): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.get(`/contacts/${contactIdentifier}`);
+    const res = await http.get(`/contacts/${encodeURIComponent(contactIdentifier)}`);
     return res.data;
   }
 
@@ -63,38 +68,35 @@ export class ChatwootPublicClient {
     custom_attributes?: Record<string, unknown>;
   }): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.patch(`/contacts/${contactIdentifier}`, data);
+    const res = await http.patch(`/contacts/${encodeURIComponent(contactIdentifier)}`, data);
     return res.data;
   }
 
   // ─── Conversations ──────────────────────────────────────
 
-  async createConversation(inboxIdentifier: string, data: {
-    contact_identifier: string;
+  async createConversation(inboxIdentifier: string, contactIdentifier: string, data: {
     custom_attributes?: Record<string, unknown>;
   }): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.post('/conversations', data);
+    const res = await http.post(this.conversationPath(contactIdentifier), data);
     return res.data;
   }
 
   async listConversations(inboxIdentifier: string, contactIdentifier: string): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.get('/conversations', {
-      params: { contact_identifier: contactIdentifier },
-    });
+    const res = await http.get(this.conversationPath(contactIdentifier));
     return res.data;
   }
 
-  async getConversation(inboxIdentifier: string, conversationId: number): Promise<unknown> {
+  async getConversation(inboxIdentifier: string, contactIdentifier: string, conversationId: number): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.get(`/conversations/${conversationId}`);
+    const res = await http.get(this.conversationPath(contactIdentifier, conversationId));
     return res.data;
   }
 
-  async resolveConversation(inboxIdentifier: string, conversationId: number): Promise<unknown> {
+  async resolveConversation(inboxIdentifier: string, contactIdentifier: string, conversationId: number): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.post(`/conversations/${conversationId}/toggle_status`);
+    const res = await http.post(`${this.conversationPath(contactIdentifier, conversationId)}/toggle_status`);
     return res.data;
   }
 
@@ -103,7 +105,8 @@ export class ChatwootPublicClient {
     contact_identifier: string;
   }): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.post(`/conversations/${conversationId}/toggle_typing`, data);
+    const path = `${this.conversationPath(data.contact_identifier, conversationId)}/toggle_typing`;
+    const res = await http.post(path, undefined, { params: { typing_status: data.typing_status } });
     return res.data;
   }
 
@@ -111,7 +114,8 @@ export class ChatwootPublicClient {
     contact_identifier: string;
   }): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.post(`/conversations/${conversationId}/update_last_seen`, data);
+    const path = `${this.conversationPath(data.contact_identifier, conversationId)}/update_last_seen`;
+    const res = await http.post(path);
     return res.data;
   }
 
@@ -123,21 +127,22 @@ export class ChatwootPublicClient {
     contact_identifier: string;
   }): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.post(`/conversations/${conversationId}/messages`, data);
+    const { contact_identifier, ...body } = data;
+    const res = await http.post(`${this.conversationPath(contact_identifier, conversationId)}/messages`, body);
     return res.data;
   }
 
-  async listMessages(inboxIdentifier: string, conversationId: number): Promise<unknown> {
+  async listMessages(inboxIdentifier: string, contactIdentifier: string, conversationId: number): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.get(`/conversations/${conversationId}/messages`);
+    const res = await http.get(`${this.conversationPath(contactIdentifier, conversationId)}/messages`);
     return res.data;
   }
 
-  async updateMessage(inboxIdentifier: string, conversationId: number, messageId: number, data: {
+  async updateMessage(inboxIdentifier: string, contactIdentifier: string, conversationId: number, messageId: number, data: {
     submitted_values?: Record<string, unknown>;
   }): Promise<unknown> {
     const http = this.forInbox(inboxIdentifier);
-    const res = await http.patch(`/conversations/${conversationId}/messages/${messageId}`, data);
+    const res = await http.patch(`${this.conversationPath(contactIdentifier, conversationId)}/messages/${messageId}`, data);
     return res.data;
   }
 }
