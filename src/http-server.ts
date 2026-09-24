@@ -1,5 +1,6 @@
 import express from 'express';
 import crypto from 'crypto';
+import packageJson from '../package.json';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
@@ -143,7 +144,7 @@ export async function startHttpServer(): Promise<void> {
     res.json({
       status: 'ok',
       server: 'mcp-chatwoot',
-      version: '0.6.0',
+      version: packageJson.version,
       activeSessions: sessions.size,
       tools: allTools.length,
     });
@@ -160,7 +161,7 @@ export async function startHttpServer(): Promise<void> {
       });
 
       const server = new Server(
-        { name: 'mcp-chatwoot', version: '0.6.0' },
+        { name: 'mcp-chatwoot', version: packageJson.version },
         { capabilities: { tools: {} } },
       );
 
