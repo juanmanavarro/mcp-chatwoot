@@ -1,6 +1,6 @@
 import express from 'express';
 import crypto from 'crypto';
-import packageJson from '../package.json';
+import { readFileSync } from 'node:fs';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
@@ -25,6 +25,7 @@ import { helpCenterTools } from './tools/helpcenter/definitions.js';
 import { handleHelpCenterToolCall } from './tools/helpcenter/handlers.js';
 
 const SESSION_TIMEOUT = 5 * 60 * 1000;
+const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string };
 
 interface SessionEntry {
   transport: StreamableHTTPServerTransport;
